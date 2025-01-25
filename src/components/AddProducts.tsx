@@ -97,7 +97,7 @@ const formattedDate = currentDate.toLocaleDateString('en-GB', options);
       terms: "Due on Receipt",
       dueDate: formattedDate,
       taxRate: 5,
-      companyName: "Zylker Electronics Hub",
+      companyName: "Zylker Inc",
       companyAddress: "148B, Northern Street South Avenue, New York, NY 10001 U.S.A",
       billTo: {
         name: customerDetails.name,

@@ -4,7 +4,6 @@ import Header from "@/components/Header";
 import Navbar from "@/components/Sidenav";
 import CreateOder from "../createorder/createordercomp";
 import HorizontalNavbar from "@/components/Horizontalnav";
-import Invoice from "./bill";
 
 const Dashboard = () => {
   const [config, setConfig] = useState<{
@@ -39,7 +38,7 @@ const Dashboard = () => {
           </aside>
         )}
         <main className="flex-grow p-8">
-        <Invoice></Invoice>
+        <CreateOder></CreateOder> 
         </main>
       </div>
     </div>
@@ -47,8 +46,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-
-
-
 

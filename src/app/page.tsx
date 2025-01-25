@@ -1,219 +1,371 @@
 "use client";
-import React, { useEffect } from "react";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Box, Checkbox, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Select, SelectChangeEvent } from "@mui/material";
 
-// Company and Customer Details
-const CompanyDetails = {
-  name: "Zylker Electronics Hub",
-  address: "148B, Northern Street Greater South Avenue, New York, NY 10001 U.S.A",
-  GSTIN: "GSTIN: 1234567890",
-  taxrate: 5.0,
-};
+const ListofComponents = ["Modules","Components"];
 
-const CustomerDetails = {
-  name: "Ms. Mary D. Dunton",
-  address: "1324 Hinkle Lake Road, Needham, 02192 Maine",
-  shipTo: {
-    address: "1324 Hinkle Lake Road, Needham, 02192 Maine",
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
   },
 };
 
-// Products
-const Products = [
-  {
-    id: 1,
-    name: "Camera",
-    description: "DSLR camera with advanced shooting capabilities",
-    quantity: 1,
-    price: 899.0,
-  },
-  {
-    id: 2,
-    name: "Fitness Tracker",
-    description: "Activity tracker with heart rate monitoring",
-    quantity: 1,
-    price: 129.0,
-  },
-  {
-    id: 3,
-    name: "Laptop",
-    description: "Lightweight laptop with a powerful processor",
-    quantity: 1,
-    price: 1199.0,
-  },
-];
+const SubcompArray = {Modules:["Create order"],Components:["table","Bar Chart"]}
 
-// Invoice JSON
-const InvoiceJson = {
-  invoiceNumber: "INV-000003",
-  invoiceDate: "18 May 2023",
-  terms: "Due on Receipt",
-  dueDate: "18 May 2023",
-  taxRate: CompanyDetails.taxrate,
-  companyName: CompanyDetails.name,
-  companyAddress: CompanyDetails.address,
-  billTo: {
-    name: CustomerDetails.name,
-    address: CustomerDetails.address,
-  },
-  shipTo: {
-    address: CustomerDetails.shipTo.address,
-  },
-  products: Products,
-};
+const SubModules = ["Create order"];
+const SubComponents = ["table","Bar Chart"];
 
-// Invoice Component
-const Invoice = () => {
-  const calculateSubTotal = () => {
-    return Products.reduce((total, product) => {
-      return total + product.price * product.quantity;
-    }, 0);
+const Setup2Page = () => {
+  const router = useRouter();
+  const [components, setComponents] = React.useState('');
+  const [personName, setPersonName] = React.useState<string[]>([]);
+
+  
+
+  const [config, setConfig] = useState({
+    header: true,
+    footer: true,
+    // enableCards: false,
+    // cards: [""],
+    navBarType: "side", // "side" or "horizontal"
+    menuItems: [{ name: "", enableSubMenu: false, subMenuItems: [{name:"",components:"",subComponents:[]}],components:"",subComponents:[] }],
+  });
+
+  const handleSubMenuToggle = (menuIndex: number) => {
+    const updatedMenuItems = [...config.menuItems];
+    updatedMenuItems[menuIndex].components =  "";
+    updatedMenuItems[menuIndex].subComponents =  [];
+    updatedMenuItems[menuIndex].enableSubMenu =
+      !updatedMenuItems[menuIndex].enableSubMenu;
+    setConfig((prev) => ({ ...prev, menuItems: updatedMenuItems }));
+    setComponents("");
+    setPersonName([]);    
   };
 
-  const totalAmount = calculateSubTotal() + (InvoiceJson.taxRate * calculateSubTotal()) / 100;
-
-  // Handle Print
-  const handlePrint = () => {
-    window.print();
+  const handleToggle = (key: keyof typeof config) => {
+    setConfig((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Handle Download PDF
-  const handleDownload = async () => {
-    if (typeof window === "undefined") return;
+  const handleAddMenuItem = () => {
+    const newMenuItem = {
+      name: "", // Default empty name for the new menu item
+      enableSubMenu: false, // By default, sub-menu is not enabled
+      subMenuItems: [{ name: "", components: "", subComponents: [] }], // Initial sub-menu item with default values
+      components: "", // No components selected initially
+      subComponents: [] // No sub-components selected initially
+    };
   
-    const invoiceElement = document.querySelector(".p-10") as HTMLElement;
-    if (!invoiceElement) {
-      console.error("Invoice element not found.");
-      return;
-    }
-  
-    try {
-      const canvas = await html2canvas(invoiceElement, { scale: 2 });
-      const imgData = canvas.toDataURL("image/png");
-  
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-  
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save("invoice.pdf");
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-    }
-  };  
-
-  // Placeholder functions for email and SMS
-  const handleSendEmail = () => {
-    alert("Email functionality is not implemented yet.");
+    // Add the new menu item to the current list of menu items
+    setConfig((prev) => ({
+      ...prev,
+      menuItems: [...prev.menuItems, newMenuItem],
+    }));
   };
 
-  const handleSendSMS = () => {
-    alert("SMS functionality is not implemented yet.");
+  const handleMenuItemChange = (index: number, value: string) => {
+    const updatedMenuItems = [...config.menuItems];
+    updatedMenuItems[index].name = value;
+    setConfig((prev) => ({ ...prev, menuItems: updatedMenuItems }));
+  };
+
+
+
+  const handleAddSubMenuItem = (menuIndex: number) => {
+    const updatedMenuItems = [...config.menuItems];
+    updatedMenuItems[menuIndex].subMenuItems.push({name:"",components:"",subComponents:[]});
+    setConfig((prev) => ({ ...prev, menuItems: updatedMenuItems }));
+    setComponents("");
+    setPersonName([]);
+  };
+
+  const handleSubMenuItemChange = (
+    menuIndex: number,
+    subMenuIndex: number,
+    value: string
+  ) => {
+    const updatedMenuItems = [...config.menuItems];
+    updatedMenuItems[menuIndex].subMenuItems[subMenuIndex].name = value;
+    setConfig((prev) => ({ ...prev, menuItems: updatedMenuItems }));
+  };
+
+  const handleSubMenuChange = (menuIndex: number,subMenuIndex:number, event: SelectChangeEvent) => {
+    const updatedMenuItems = [...config.menuItems];
+    updatedMenuItems[menuIndex].subMenuItems[subMenuIndex].components = event.target.value as string;
+    setConfig((prev) => ({ ...prev, menuItems: updatedMenuItems }));
+    setComponents(event.target.value as string);
+  }
+
+  const handleSave = () => {
+    localStorage.setItem("dashboardConfig", JSON.stringify(config));
+    router.push("/dashboard");
+  };
+
+  const handleChange = (menuIndex: number, event: SelectChangeEvent) => {
+      const updatedMenuItems = [...config.menuItems];
+      console.log(event.target.value, "event.target.value");  
+      
+      updatedMenuItems[menuIndex].components = event.target.value as string;
+      setConfig((prev) => ({ ...prev, menuItems: updatedMenuItems }));
+  
+      setComponents(event.target.value as string);
+      
+    };
+
+  const handleChangeSubComponent = (event: SelectChangeEvent<typeof personName>,menuIndex:number) => {
+    const {
+      target: { value },
+    } = event;
+    setPersonName(
+      // On autofill we get a stringified value.
+      typeof value === 'string' ? value.split(',') : value,
+    );
+
+    const updatedMenuItems = [...config.menuItems];
+    updatedMenuItems[menuIndex].subComponents = value as [];
+    setConfig((prev) => ({ ...prev, menuItems: updatedMenuItems }));
+    
+  };
+
+  const handleChangeSubMenuComponent = (event: SelectChangeEvent<typeof personName>,menuIndex:number,subMenuIndex:number) => {
+    const {
+      target: { value },
+    } = event;
+    setPersonName(
+      // On autofill we get a stringified value.
+      typeof value === 'string' ? value.split(',') : value,
+    );
+
+    const updatedMenuItems = [...config.menuItems];
+    updatedMenuItems[menuIndex].subMenuItems[subMenuIndex].subComponents = value as [];
+    setConfig((prev) => ({ ...prev, menuItems: updatedMenuItems }));
+    
   };
 
   return (
-    <div className="p-10 max-w-3xl mx-auto border border-gray-300 rounded shadow-lg">
-      {/* Header */}
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold">{InvoiceJson.companyName}</h1>
-        <p className="text-sm">{InvoiceJson.companyAddress}</p>
-      </div>
-
-      {/* Invoice Info */}
-      <div className="grid grid-cols-2 text-sm mb-6">
-        <div>
-          <p><strong>Invoice#</strong>: {InvoiceJson.invoiceNumber}</p>
-          <p><strong>Invoice Date</strong>: {InvoiceJson.invoiceDate}</p>
-          <p><strong>Terms</strong>: {InvoiceJson.terms}</p>
-          <p><strong>Due Date</strong>: {InvoiceJson.dueDate}</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100">
+      <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg p-8">
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-extrabold text-purple-800 mb-2">
+            Setup Your  Dashboard
+          </h1>
         </div>
-      </div>
 
-      {/* Billing and Shipping */}
-      <div className="mb-6">
-        <div className="grid grid-cols-2">
-          <div>
-            <h2 className="font-bold">Bill To</h2>
-            <p>{InvoiceJson.billTo.name}</p>
-            <p>{InvoiceJson.billTo.address}</p>
-          </div>
-          <div>
-            <h2 className="font-bold">Ship To</h2>
-            <p>{InvoiceJson.shipTo.address}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Product Table */}
-      <table className="table-auto w-full text-sm border-collapse border border-gray-300 mb-6">
-        <thead>
-          <tr className="bg-blue-100">
-            <th className="border border-gray-300 px-4 py-2 text-left">#</th>
-            <th className="border border-gray-300 px-4 py-2 text-left">Item & Description</th>
-            <th className="border border-gray-300 px-4 py-2 text-center">Qty</th>
-            <th className="border border-gray-300 px-4 py-2 text-right">Rate</th>
-            <th className="border border-gray-300 px-4 py-2 text-right">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {InvoiceJson.products.map((product, index) => (
-            <tr key={index}>
-              <td className="border border-gray-300 px-4 py-2">{product.id}</td>
-              <td className="border border-gray-300 px-4 py-2">{product.name}<br /><span className="text-gray-500">{product.description}</span></td>
-              <td className="border border-gray-300 px-4 py-2 text-center">{product.quantity}</td>
-              <td className="border border-gray-300 px-4 py-2 text-right">${product.price}</td>
-              <td className="border border-gray-300 px-4 py-2 text-right">${product.price * product.quantity}</td>
-            </tr>
+        {/* Header and Footer Toggles */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+          {["header", "footer"].map((key) => (
+            <div
+              key={key}
+              className={`p-6 rounded-lg shadow-md border transition ${
+                config[key as keyof typeof config]
+                  ? "bg-purple-50 border-purple-400 hover:shadow-lg"
+                  : "bg-gray-100 border-gray-300 hover:shadow-md"
+              } cursor-pointer`}
+              onClick={() => handleToggle(key as keyof typeof config)}
+            >
+              <h2 className="text-xl font-bold text-gray-800 capitalize text-center">
+                {key}
+              </h2>
+              <p
+                className={`mt-2 text-center ${
+                  config[key as keyof typeof config]
+                    ? "text-purple-600"
+                    : "text-gray-500"
+                }`}
+              >
+                {config[key as keyof typeof config] ? "Enabled" : "Disabled"}
+              </p>
+            </div>
           ))}
-        </tbody>
-      </table>
-
-      {/* Summary */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div>
-          <p>Thanks for shopping with us.</p>
         </div>
-        <div>
-          <table className="w-full text-sm border border-gray-300">
-            <tbody>
-              <tr>
-                <td className="border border-gray-300 px-4 py-2 text-right">Total</td>
-                <td className="border border-gray-300 px-4 py-2 text-right">${calculateSubTotal().toFixed(2)}</td>
-              </tr>
-              <tr>
-                <td className="border border-gray-300 px-4 py-2 text-right">Tax {InvoiceJson.taxRate}%</td>
-                <td className="border border-gray-300 px-4 py-2 text-right">${((InvoiceJson.taxRate * calculateSubTotal()) / 100).toFixed(2)}</td>
-              </tr>
-              <tr className="bg-blue-100">
-                <td className="border border-gray-300 px-4 py-2 text-right font-bold">Net Payable</td>
-                <td className="border border-gray-300 px-4 py-2 text-right font-bold">${totalAmount.toFixed(2)}</td>
-              </tr>
-            </tbody>
-          </table>
+        {/* Nav Bar Configuration */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-purple-800 mb-4">Nav Bar</h2>
+          <div className="flex space-x-8">
+            {["side", "horizontal"].map((type) => (
+              <label key={type} className="flex items-center space-x-4">
+                <input
+                  type="radio"
+                  name="navBarType"
+                  value={type}
+                  checked={config.navBarType === type}
+                  onChange={() => setConfig((prev) => ({ ...prev, navBarType: type }))}
+                  className="w-5 h-5 text-purple-600 focus:ring focus:ring-purple-300"
+                />
+                <span className="text-gray-800 capitalize">{type} Nav Bar</span>
+              </label>
+            ))}
+          </div>
+
+          <div className="mt-4">
+            <h3 className="text-lg font-bold text-purple-700 mb-2">
+              Configure Menu Items
+            </h3>
+            {config.menuItems.map((menuItem, menuIndex) => (
+              <div key={menuIndex} className="mb-6 space-x-4">
+                <div className="flex items-center space-x-4">
+                <input
+                  type="text"
+                  value={menuItem.name}
+                  onChange={(e) =>
+                    handleMenuItemChange(menuIndex, e.target.value)
+                  }
+                  placeholder={`Menu Item ${menuIndex + 1}`}
+                  className="w-half px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-purple-300 text-gray-900 placeholder-gray-500"
+                />
+            { !menuItem.enableSubMenu &&
+       <Box sx={{ minWidth: 180 }}>
+       <FormControl fullWidth>
+         <InputLabel id="demo-simple-select-label">Select Features</InputLabel>
+         <Select
+           labelId="demo-simple-select-label"
+           id="demo-simple-select"
+           value={components}
+           label="Add Components"
+           onChange={(e) =>  handleChange(menuIndex,e)}
+         >
+           {ListofComponents.map((item, index) => (
+             <MenuItem key={index} value={item}>{item}</MenuItem>
+           ))}
+         </Select>
+       </FormControl>
+     </Box>
+            }
+          
+    {  !menuItem.enableSubMenu && components &&  <Box>     
+       <FormControl sx={{ m: 1, width: 300 }}>
+        <InputLabel id="demo-multiple-checkbox-label">Select {menuItem.components}</InputLabel>
+        <Select
+          labelId="demo-multiple-checkbox-label"
+          id="demo-multiple-checkbox"
+          multiple
+          value={personName}
+          onChange={(e) => handleChangeSubComponent(e,menuIndex)}
+          input={<OutlinedInput label="Add Sub Components" />}
+          renderValue={(selected) => selected.join(', ')}
+          MenuProps={MenuProps}
+        >
+          { (menuItem.components == "Modules" ? SubModules: SubComponents).map((name:string) => (
+            <MenuItem sx={{maxHeight:"60px"}} key={name} value={name}>
+              <Checkbox checked={personName.includes(name)} />
+              <ListItemText primary={name} />
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      </Box>}
+                  </div>
+                <label className="flex items-center space-x-4 mt-2">
+                  <input
+                    type="checkbox"
+                    checked={menuItem.enableSubMenu}
+                    onChange={() => handleSubMenuToggle(menuIndex)}
+                    className="w-5 h-5 text-purple-600 focus:ring focus:ring-purple-300"
+                  />
+                  <span className="text-gray-800">Enable Sub Menu</span>
+                </label>
+                {menuItem.enableSubMenu && (
+                  <div className="mt-4 space-y-4">
+
+                    
+                    {menuItem.subMenuItems.map((subMenuItem, subMenuIndex) => (
+                         <div className="flex items-center space-x-4">
+
+                      <input
+                        key={subMenuIndex}
+                        type="text"
+                        value={subMenuItem?.name}
+                        onChange={(e) =>
+                          handleSubMenuItemChange(
+                            menuIndex,
+                            subMenuIndex,
+                            e.target.value
+                          )
+                        }
+                        placeholder={`Sub Menu Item ${subMenuIndex + 1}`}
+                        className="w-half px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-purple-300 text-gray-900 placeholder-gray-500"
+
+                      />
+     <Box sx={{ minWidth: 180 }}>
+       <FormControl fullWidth>
+         <InputLabel id="demo-simple-select-label">Select Features</InputLabel>
+         <Select
+           labelId="demo-simple-select-label"
+           id="demo-simple-select"
+           value={config.menuItems[menuIndex].subMenuItems[subMenuIndex].components || ""}
+           label="Add Components"
+           onChange={(e) =>  handleSubMenuChange(menuIndex,subMenuIndex,e)}
+         >
+           {ListofComponents.map((item, index) => (
+             <MenuItem key={index} value={item}>{item}</MenuItem>
+           ))}
+         </Select>
+       </FormControl>
+     </Box>
+     {  config.menuItems[menuIndex].subMenuItems[subMenuIndex].components &&  <Box>     
+       <FormControl sx={{ m: 1, width: 300 }}>
+        <InputLabel id="demo-multiple-checkbox-label">Add {config.menuItems[menuIndex].subMenuItems[subMenuIndex].components}</InputLabel>
+        <Select
+          labelId="demo-multiple-checkbox-label"
+          id="demo-multiple-checkbox"
+          multiple
+          value={config.menuItems[menuIndex].subMenuItems[subMenuIndex].subComponents || []}
+          onChange={(e) => handleChangeSubMenuComponent(e,menuIndex,subMenuIndex)}
+          input={<OutlinedInput label="Add Sub Components" />}
+          renderValue={(selected) => selected.join(', ')}
+          MenuProps={MenuProps}
+        >
+          {(config.menuItems[menuIndex].subMenuItems[subMenuIndex].components == "Modules" ? SubModules: SubComponents).map((name) => (
+            <MenuItem sx={{maxHeight:"60px"}} key={name} value={name}>
+              <Checkbox checked={personName.includes(name)} />
+              <ListItemText primary={name} />
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      </Box>}
+       </div>
+                    ))}
+
+                    <button
+                      onClick={() => handleAddSubMenuItem(menuIndex)}
+                      className="mt-2 px-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition"
+                    >
+                      Add More Sub Menu Items
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+            <button
+              onClick={handleAddMenuItem}
+              className="mt-4 px-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition"
+            >
+              Add More Menu Items
+            </button>
+          </div>
         </div>
-      </div>
-
-      {/* Terms & Conditions */}
-      <div className="text-sm">
-        <h2 className="font-bold">Terms & Conditions</h2>
-        <p>Full payment is due upon receipt of this invoice. Late payments may incur additional charges or interest as per the applicable laws.</p>
-      </div>
-
-      {/* Footer */}
-      <div className="text-center text-xs mt-6">
-        <p>Powered by PROJECT FLEX</p>
-      </div>
-
-      {/* Actions */}
-      <div className="text-center mt-4 space-x-4">
-        <button onClick={handlePrint} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Print Invoice</button>
-        <button onClick={handleDownload} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Download Invoice</button>
-        <button onClick={handleSendEmail} className="px-4 py-2 bg-yellow-400 text-white rounded hover:bg-yellow-500">Send Email</button>
-        <button onClick={handleSendSMS} className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">Send SMS</button>
+        <div className="text-center">
+          <button
+            onClick={handleSave}
+            className="px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition shadow-lg"
+          >
+            Save & Go to Dashboard
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Invoice;
+export default Setup2Page;
+
+
+
+
