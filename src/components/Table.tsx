@@ -1,4 +1,5 @@
 "use client";
+import { Card } from "@mui/material";
 interface Product {
   id: string;
   category: string;
@@ -16,7 +17,7 @@ const data: Product[] = [
 
 export default function Table() {
   return (
-    <div className="p-4">
+    <Card sx={{p:4}}>
       <table className="min-w-full border-collapse border border-gray-200">
         <thead>
           <tr>
@@ -37,6 +38,6 @@ export default function Table() {
           ))}
         </tbody>
       </table>
-    </div>
+    </Card>
   );
 }

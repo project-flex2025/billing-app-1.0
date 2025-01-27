@@ -9,9 +9,9 @@ const HorizontalNavbar = ({ menuItems }: any) => {
   const router = useRouter();
 
   return (
-    <nav className="p-4 w-full">
+    <nav className="p-4 w-full bg-white shadow-md">
       <h2 className="text-xl font-semibold text-indigo-600 mb-4">Navigation</h2>
-      <ul className="flex space-x-3">
+      <ul className="flex justify-start space-x-3">
         {menuItems?.map((item: any, index: any) => (
           <li
             key={index}

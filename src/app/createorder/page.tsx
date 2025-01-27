@@ -21,7 +21,7 @@ const Dashboard = () => {
       setConfig(JSON.parse(storedConfig));
     }
   }, []);
-  ``
+  
   if (!config) {
     return <p className="text-center mt-6">Loading configuration...</p>;
   }

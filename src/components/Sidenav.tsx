@@ -5,7 +5,8 @@ type NavbarProps = {
   };
   
   const Navbar = ({ menuItems }: any) => 
-    {  const router = useRouter();
+    {
+      const router = useRouter();
        return (    
     <nav className="p-4">
       <h2 className="text-xl font-semibold text-indigo-600 mb-4">Navigation</h2>

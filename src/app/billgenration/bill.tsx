@@ -77,9 +77,7 @@ const Invoice = () => {
 
     useEffect(() => {
         const data = localStorage.getItem("customerData");
-        // if (data) setCustomerData(JSON.parse(data));
       if (data)  setBillJson(JSON.parse(data))
-        
       }, []);
 
       useEffect(() => {
