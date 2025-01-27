@@ -13,7 +13,7 @@ type NavbarProps = {
         {menuItems?.map((item: any, index: any) => (
           <li
             key={index}            
-            onClick={() => router.push(`${(item.name).replace(/\s/g, "")}`)            }
+            onClick={() => router.push(`/${(item.name).replace(/\s/g, "")}`)            }
             className="px-4 py-2 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-medium shadow-sm cursor-pointer transition"
           >
             {`${item.name}`}

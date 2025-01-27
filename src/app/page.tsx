@@ -16,10 +16,10 @@ const MenuProps = {
   },
 };
 
-const SubcompArray = {Modules:["Create order"],Components:["table","Bar Chart"]}
+const SubcompArray = {Modules:["Create order"],Components:["table"]}
 
 const SubModules = ["Create order"];
-const SubComponents = ["table","Bar Chart"];
+const SubComponents = ["table"];
 
 const Setup2Page = () => {
   const router = useRouter();
